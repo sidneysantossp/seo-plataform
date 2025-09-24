@@ -100,6 +100,11 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
 
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="lg:hidden">
+            <Menu className="w-4 h-4" />
+          </Button>
+        </SheetTrigger>
         <SheetContent side="left" className="w-64 p-0">
           <NavContent />
         </SheetContent>
@@ -110,11 +115,6 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
         {/* Header */}
         <header className="flex items-center justify-between p-4 border-b bg-card">
           <div className="flex items-center gap-4">
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="lg:hidden">
-                <Menu className="w-4 h-4" />
-              </Button>
-            </SheetTrigger>
             <h2 className="text-lg font-semibold">
               {navigation.find(item => item.href === pathname)?.name || 'Dashboard'}
             </h2>
