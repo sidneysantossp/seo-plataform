@@ -26,7 +26,7 @@ import {
   Globe,
   BarChart3,
   Search,
-  Link,
+  Link as LinkIcon,
   Tag,
   User,
   Activity
