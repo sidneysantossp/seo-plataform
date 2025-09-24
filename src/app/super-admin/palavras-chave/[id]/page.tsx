@@ -27,7 +27,8 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  Plus
+  Plus,
+  Minus
 } from 'lucide-react'
 
 // Dados de exemplo para detalhes da palavra-chave

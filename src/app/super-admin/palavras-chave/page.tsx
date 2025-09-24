@@ -359,7 +359,7 @@ export default function PalavrasChavePage() {
                 </div>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm">> 20</span>
+                <span className="text-sm">&gt; 20</span>
                 <div className="flex items-center gap-2">
                   <Progress value={20} className="w-24 h-2" />
                   <span className="text-sm font-medium">1</span>

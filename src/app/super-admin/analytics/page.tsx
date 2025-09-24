@@ -30,7 +30,8 @@ import {
   Zap,
   DollarSign,
   ShoppingCart,
-  FileText
+  FileText,
+  Minus
 } from 'lucide-react'
 
 // Dados de exemplo para analytics
