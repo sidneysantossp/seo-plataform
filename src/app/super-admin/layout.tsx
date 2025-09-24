@@ -17,7 +17,9 @@ import {
   TrendingUp,
   FileBarChart,
   Users,
-  Zap
+  Zap,
+  CreditCard,
+  Puzzle
 } from 'lucide-react'
 
 const navigation = [
@@ -28,6 +30,8 @@ const navigation = [
   { name: 'Palavras-Chave', href: '/super-admin/palavras-chave', icon: Search },
   { name: 'Analytics', href: '/super-admin/analytics', icon: TrendingUp },
   { name: 'Relatórios', href: '/super-admin/relatorios', icon: BarChart3 },
+  { name: 'Planos', href: '/super-admin/planos', icon: CreditCard },
+  { name: 'Módulos', href: '/super-admin/modulos', icon: Puzzle },
   { name: 'Integrações', href: '/super-admin/integracoes', icon: Zap },
   { name: 'Configurações', href: '/super-admin/configuracoes', icon: Settings },
 ]
