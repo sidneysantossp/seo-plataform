@@ -21,7 +21,9 @@ import {
   Clock,
   AlertTriangle,
   Plus,
-  Trash2
+  Trash2,
+  Mail,
+  Eye
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -102,6 +104,10 @@ export default function ProjectConfigPage() {
       case 'low': return 'Baixa'
       default: return 'Desconhecida'
     }
+  }
+
+  const handleSendEmail = (email: string) => {
+    window.open(`mailto:${email}`, '_blank')
   }
 
   return (
@@ -316,36 +322,76 @@ export default function ProjectConfigPage() {
 
           {/* Team Members */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Equipe</CardTitle>
+              <Link href={`/super-admin/projetos-seo/${projectId}/equipe`}>
+                <Button variant="outline" size="sm">
+                  <Users className="w-4 h-4 mr-2" />
+                  Gerenciar Equipe
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                    {project.manager.name.charAt(0)}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                      {project.manager.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium">{project.manager.name}</p>
+                      <p className="text-xs text-muted-foreground">Gerente</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{project.manager.name}</p>
-                    <p className="text-xs text-muted-foreground">Gerente</p>
+                  <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleSendEmail(project.manager.email)}
+                    >
+                      <Mail className="w-3 h-3" />
+                    </Button>
+                    <Link href={`/super-admin/projetos-seo/${projectId}/equipe/manager`}>
+                      <Button variant="ghost" size="sm">
+                        <Eye className="w-3 h-3" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
                 {project.team.map((member) => (
-                  <div key={member.id} className="flex items-center gap-2 text-sm">
-                    <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-                      {member.name.charAt(0)}
+                  <div key={member.id} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+                        {member.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-medium">{member.name}</p>
+                        <p className="text-xs text-muted-foreground">{member.role}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{member.name}</p>
-                      <p className="text-xs text-muted-foreground">{member.role}</p>
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleSendEmail(member.email || '')}
+                      >
+                        <Mail className="w-3 h-3" />
+                      </Button>
+                      <Link href={`/super-admin/projetos-seo/${projectId}/equipe/${member.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 ))}
               </div>
-              <Button variant="outline" size="sm" className="w-full">
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Membro
-              </Button>
+              <Link href={`/super-admin/projetos-seo/${projectId}/equipe`}>
+                <Button variant="outline" size="sm" className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Gerenciar Equipe Completa
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
