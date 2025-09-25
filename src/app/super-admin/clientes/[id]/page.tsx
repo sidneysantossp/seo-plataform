@@ -139,10 +139,12 @@ export default function ClientDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Edit className="w-4 h-4 mr-2" />
-            Editar
-          </Button>
+          <Link href={`/super-admin/clientes/${client.id}/editar`}>
+            <Button variant="outline">
+              <Edit className="w-4 h-4 mr-2" />
+              Editar
+            </Button>
+          </Link>
           <Button variant="outline">
             <Settings className="w-4 h-4 mr-2" />
             Configurar
