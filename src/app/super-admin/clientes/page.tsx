@@ -19,15 +19,112 @@ import {
   Star,
   MoreHorizontal,
   Edit,
-  Eye
+  Eye,
+  Trash2,
+  Archive,
+  AlertTriangle
 } from 'lucide-react'
 import Link from 'next/link'
 import { clients, type Client } from '@/data/clients'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuLabel
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import { seoProjects } from '@/data/seoProjects'
 
 export default function ClientsPage() {
   const [clientsList, setClientsList] = useState<Client[]>(clients)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+
+  // Função para verificar se um cliente tem projetos ativos
+  const hasActiveProjects = (clientName: string): boolean => {
+    const activeProjects = seoProjects.filter(project => 
+      project.client === clientName && 
+      project.status === 'active'
+    )
+    return activeProjects.length > 0
+  }
+
+  // Função para finalizar projetos de um cliente
+  const finalizeClientProjects = (clientName: string): void => {
+    // Em uma implementação real, isso atualizaria os projetos no banco de dados
+    console.log(`Finalizando projetos do cliente: ${clientName}`)
+  }
+
+  // Função para excluir um cliente
+  const deleteClient = (clientId: string): void => {
+    const clientName = clientsList.find(c => c.id === clientId)?.name || ''
+    
+    // Verificar se há projetos ativos
+    if (hasActiveProjects(clientName)) {
+      // Finalizar projetos antes de excluir
+      finalizeClientProjects(clientName)
+    }
+    
+    // Remover cliente da lista
+    setClientsList(prev => prev.filter(client => client.id !== clientId))
+  }
+
+  // Função para arquivar/desativar um cliente
+  const archiveClient = (clientId: string): void => {
+    setClientsList(prev => prev.map(client => 
+      client.id === clientId 
+        ? { ...client, status: 'inactive' as const }
+        : client
+    ))
+  }
+
+  // Função para verificar se um cliente tem pagamento atrasado
+  const hasOverduePayment = (client: Client): boolean => {
+    return client.paymentStatus === 'overdue'
+  }
+
+  // Função para desativar cliente por pagamento atrasado
+  const deactivateForOverduePayment = (clientId: string): void => {
+    setClientsList(prev => prev.map(client => 
+      client.id === clientId 
+        ? { ...client, status: 'inactive' as const }
+        : client
+    ))
+  }
+
+  // Função para obter a cor do status de pagamento
+  const getPaymentStatusColor = (paymentStatus?: string) => {
+    switch (paymentStatus) {
+      case 'paid': return 'bg-green-500'
+      case 'pending': return 'bg-yellow-500'
+      case 'overdue': return 'bg-red-500'
+      case 'cancelled': return 'bg-gray-500'
+      default: return 'bg-gray-300'
+    }
+  }
+
+  // Função para obter o texto do status de pagamento
+  const getPaymentStatusText = (paymentStatus?: string) => {
+    switch (paymentStatus) {
+      case 'paid': return 'Pago'
+      case 'pending': return 'Pendente'
+      case 'overdue': return 'Atrasado'
+      case 'cancelled': return 'Cancelado'
+      default: return 'Não informado'
+    }
+  }
 
   const filteredClients = clientsList.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -177,11 +274,21 @@ export default function ClientsPage() {
                     {client.company}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${getStatusColor(client.status)}`} />
-                  <Badge variant={client.status === 'active' ? 'default' : 'secondary'}>
-                    {getStatusText(client.status)}
-                  </Badge>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${getStatusColor(client.status)}`} />
+                    <Badge variant={client.status === 'active' ? 'default' : 'secondary'}>
+                      {getStatusText(client.status)}
+                    </Badge>
+                  </div>
+                  {client.paymentStatus && (
+                    <div className="flex items-center gap-1">
+                      <div className={`w-1.5 h-1.5 rounded-full ${getPaymentStatusColor(client.paymentStatus)}`} />
+                      <span className="text-xs text-muted-foreground">
+                        {getPaymentStatusText(client.paymentStatus)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardHeader>
@@ -238,6 +345,31 @@ export default function ClientsPage() {
                 </div>
               </div>
 
+              {/* Payment Info */}
+              {client.monthlyFee && client.monthlyFee > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Informações de Pagamento</p>
+                  <div className="bg-gray-50 rounded p-2 text-xs space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Mensalidade:</span>
+                      <span className="font-medium">R$ {client.monthlyFee.toLocaleString('pt-BR')}</span>
+                    </div>
+                    {client.lastPaymentDate && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Último pagamento:</span>
+                        <span>{new Date(client.lastPaymentDate).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    )}
+                    {client.nextPaymentDate && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Próximo pagamento:</span>
+                        <span>{new Date(client.nextPaymentDate).toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Actions */}
               <div className="flex gap-2 pt-2">
                 <Link href={`/super-admin/clientes/${client.id}`} className="flex-1">
@@ -246,12 +378,152 @@ export default function ClientsPage() {
                     Ver Detalhes
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm">
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
+                <Link href={`/super-admin/clientes/${client.id}/editar`}>
+                  <Button variant="outline" size="sm">
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Ações do Cliente</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href={`/super-admin/clientes/${client.id}/editar`}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Editar Cliente
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/super-admin/projetos-seo/novo?client=${client.id}`}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Novo Projeto
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {hasOverduePayment(client) && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-orange-600" onSelect={(e) => e.preventDefault()}>
+                            <AlertTriangle className="w-4 h-4 mr-2" />
+                            Desativar por Pagamento Atrasado
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2">
+                              <AlertTriangle className="w-5 h-5" />
+                              Desativar Cliente por Pagamento Atrasado
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              <div className="space-y-2">
+                                <p>
+                                  O cliente "{client.name}" possui pagamento atrasado. 
+                                  Deseja desativá-lo temporariamente até que o pagamento seja regularizado?
+                                </p>
+                                {hasActiveProjects(client.name) && (
+                                  <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
+                                    <p className="text-sm font-medium mb-1">Atenção:</p>
+                                    <p className="text-sm">
+                                      Este cliente possui projetos ativos que serão pausados automaticamente.
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction 
+                              onClick={() => deactivateForOverduePayment(client.id)}
+                              className="bg-orange-600 hover:bg-orange-700"
+                            >
+                              Desativar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>
+                          <Archive className="w-4 h-4 mr-2" />
+                          Arquivar Cliente
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Arquivar Cliente</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja arquivar o cliente "{client.name}"? 
+                            Isso o tornará inativo e não aparecerá nas listagens principais.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => archiveClient(client.id)}>
+                            Arquivar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Excluir Cliente
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5" />
+                            Excluir Cliente
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            {hasActiveProjects(client.name) ? (
+                              <div className="space-y-2">
+                                <p>
+                                  Este cliente possui projetos ativos. Ao excluí-lo, os seguintes projetos serão finalizados automaticamente:
+                                </p>
+                                <div className="bg-yellow-50 border border-yellow-200 rounded p-2">
+                                  {seoProjects
+                                    .filter(p => p.client === client.name && p.status === 'active')
+                                    .map(p => (
+                                      <div key={p.id} className="text-sm">
+                                        • {p.name}
+                                      </div>
+                                    ))}
+                                </div>
+                                <p className="font-medium">
+                                  Tem certeza que deseja excluir permanentemente o cliente "{client.name}"?
+                                </p>
+                              </div>
+                            ) : (
+                              <p>
+                                Tem certeza que deseja excluir permanentemente o cliente "{client.name}"? 
+                                Esta ação não pode ser desfeita.
+                              </p>
+                            )}
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => deleteClient(client.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardContent>
           </Card>

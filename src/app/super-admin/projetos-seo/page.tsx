@@ -21,15 +21,90 @@ import {
   Pause,
   Eye,
   Settings,
-  MoreHorizontal
+  MoreHorizontal,
+  Play,
+  Square,
+  Trash2,
+  Archive
 } from 'lucide-react'
 import Link from 'next/link'
 import { seoProjects, type SEOProject } from '@/data/seoProjects'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuLabel
+} from '@/components/ui/dropdown-menu'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
 export default function SEOProjectsPage() {
   const [projects, setProjects] = useState<SEOProject[]>(seoProjects)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+
+  // Função para pausar/retomar um projeto
+  const toggleProjectPause = (projectId: string) => {
+    setProjects(prev => prev.map(project => {
+      if (project.id === projectId) {
+        const newStatus = project.status === 'active' ? 'paused' : 'active'
+        return { ...project, status: newStatus as SEOProject['status'] }
+      }
+      return project
+    }))
+  }
+
+  // Função para finalizar um projeto
+  const completeProject = (projectId: string) => {
+    setProjects(prev => prev.map(project => {
+      if (project.id === projectId) {
+        return { 
+          ...project, 
+          status: 'completed' as const,
+          endDate: new Date().toISOString().split('T')[0]
+        }
+      }
+      return project
+    }))
+  }
+
+  // Função para cancelar um projeto
+  const cancelProject = (projectId: string) => {
+    setProjects(prev => prev.map(project => {
+      if (project.id === projectId) {
+        return { 
+          ...project, 
+          status: 'cancelled' as const,
+          endDate: new Date().toISOString().split('T')[0]
+        }
+      }
+      return project
+    }))
+  }
+
+  // Função para arquivar um projeto
+  const archiveProject = (projectId: string) => {
+    setProjects(prev => prev.map(project => {
+      if (project.id === projectId) {
+        return { 
+          ...project, 
+          status: 'cancelled' as const
+        }
+      }
+      return project
+    }))
+  }
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -304,12 +379,144 @@ export default function SEOProjectsPage() {
                     Ver Detalhes
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm">
-                  <Settings className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm">
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
+                <Link href={`/super-admin/projetos-seo/${project.id}/configuracoes`}>
+                  <Button variant="outline" size="sm">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Ações do Projeto</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href={`/super-admin/projetos-seo/${project.id}/configuracoes`}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Configurações
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/super-admin/projetos-seo/${project.id}/tarefas/nova`}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nova Tarefa
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/super-admin/projetos-seo/${project.id}/relatorios`}>
+                        <TrendingUp className="w-4 h-4 mr-2" />
+                        Ver Relatórios
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {project.status === 'active' ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-yellow-600" onSelect={(e) => e.preventDefault()}>
+                            <Pause className="w-4 h-4 mr-2" />
+                            Pausar Projeto
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Pausar Projeto</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja pausar o projeto "{project.name}"? 
+                              Todas as tarefas ativas serão temporariamente suspensas.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => toggleProjectPause(project.id)}>
+                              Pausar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : project.status === 'paused' ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-green-600" onSelect={(e) => e.preventDefault()}>
+                            <Play className="w-4 h-4 mr-2" />
+                            Retomar Projeto
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Retomar Projeto</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja retomar o projeto "{project.name}"? 
+                              As tarefas serão reativadas e o projeto voltará ao andamento normal.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => toggleProjectPause(project.id)}>
+                              Retomar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : null}
+                    {project.status === 'active' || project.status === 'paused' ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-blue-600" onSelect={(e) => e.preventDefault()}>
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Finalizar Projeto
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Finalizar Projeto</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja finalizar o projeto "{project.name}"? 
+                              O projeto será marcado como concluído e não poderá mais ser editado.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => completeProject(project.id)}>
+                              Finalizar
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : null}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Cancelar Projeto
+                        </DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5" />
+                            Cancelar Projeto
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja cancelar o projeto "{project.name}"? 
+                            Esta ação não pode ser desfeita e o projeto será marcado como cancelado.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => cancelProject(project.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Cancelar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </CardContent>
           </Card>

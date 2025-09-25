@@ -23,6 +23,10 @@ export interface Client {
     position: string
   }
   status: 'active' | 'inactive' | 'prospect'
+  paymentStatus?: 'paid' | 'pending' | 'overdue' | 'cancelled'
+  lastPaymentDate?: string
+  nextPaymentDate?: string
+  monthlyFee?: number
   createdAt: string
   updatedAt: string
 }
@@ -53,6 +57,10 @@ export const clients: Client[] = [
       position: 'Diretor de Marketing'
     },
     status: 'active',
+    paymentStatus: 'paid',
+    lastPaymentDate: '2024-01-01',
+    nextPaymentDate: '2024-02-01',
+    monthlyFee: 2500,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z'
   },
@@ -81,6 +89,10 @@ export const clients: Client[] = [
       position: 'CEO'
     },
     status: 'active',
+    paymentStatus: 'overdue',
+    lastPaymentDate: '2023-12-01',
+    nextPaymentDate: '2024-01-01',
+    monthlyFee: 3000,
     createdAt: '2024-01-15T00:00:00Z',
     updatedAt: '2024-02-01T14:00:00Z'
   },
@@ -108,6 +120,10 @@ export const clients: Client[] = [
       position: 'Diretor Clínico'
     },
     status: 'active',
+    paymentStatus: 'paid',
+    lastPaymentDate: '2024-01-01',
+    nextPaymentDate: '2024-02-01',
+    monthlyFee: 2000,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-10T09:00:00Z'
   },
@@ -135,6 +151,10 @@ export const clients: Client[] = [
       position: 'Chef Proprietário'
     },
     status: 'active',
+    paymentStatus: 'pending',
+    lastPaymentDate: '2024-01-10',
+    nextPaymentDate: '2024-02-10',
+    monthlyFee: 1500,
     createdAt: '2024-01-10T00:00:00Z',
     updatedAt: '2024-01-20T11:00:00Z'
   },
@@ -161,6 +181,8 @@ export const clients: Client[] = [
       position: 'Diretor Presidente'
     },
     status: 'prospect',
+    paymentStatus: 'pending',
+    monthlyFee: 0,
     createdAt: '2024-02-01T00:00:00Z',
     updatedAt: '2024-02-01T10:00:00Z'
   }
