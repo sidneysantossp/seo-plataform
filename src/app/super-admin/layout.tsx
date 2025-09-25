@@ -19,11 +19,13 @@ import {
   Users,
   Zap,
   CreditCard,
-  Puzzle
+  Puzzle,
+  Building
 } from 'lucide-react'
 
 const navigation = [
   { name: 'Dashboard', href: '/super-admin', icon: Home },
+  { name: 'Clientes', href: '/super-admin/clientes', icon: Building },
   { name: 'Projetos SEO', href: '/super-admin/projetos-seo', icon: FileText },
   { name: 'Agentes de IA', href: '/super-admin/agentes-ia', icon: Bot },
   { name: 'Conteúdo', href: '/super-admin/conteudo', icon: FileBarChart },

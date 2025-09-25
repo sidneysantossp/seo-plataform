@@ -100,10 +100,12 @@ export default function SEOProjectsPage() {
             Gestão completa de projetos de otimização para mecanismos de busca
           </p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Novo Projeto
-        </Button>
+        <Link href="/super-admin/projetos-seo/novo">
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Projeto
+          </Button>
+        </Link>
       </div>
 
       {/* Stats Overview */}
@@ -322,10 +324,12 @@ export default function SEOProjectsPage() {
             <p className="text-muted-foreground mb-4">
               {searchTerm ? 'Tente ajustar sua busca ou filtros.' : 'Comece criando seu primeiro projeto SEO.'}
             </p>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Projeto
-            </Button>
+            <Link href="/super-admin/projetos-seo/novo">
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Projeto
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       )}
